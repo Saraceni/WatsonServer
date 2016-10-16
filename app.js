@@ -41,16 +41,15 @@ if ( cloudantCredentials ) {
 cloudantUrl = cloudantUrl || process.env.CLOUDANT_URL; // || '<cloudant_url>';
 var logs = null;
 var app = express();
+app.io_socket = {};
 
 // Bootstrap application settings
 //app.use( express.static( './public' ) ); // load UI from public folder
 // POST method route
 app.use(bodyParser.json());
 
-app.post('/', function (req, res) {
-  responsesCtrl.handleRequest(req.body.text, function(result){
-    res.send("Result");
-  })
+app.get('/', function(req, res){
+  res.sendFile(__dirname + '/iosocket/index.html');
 });
 
 // Create the service wrapper
@@ -111,14 +110,14 @@ function updateMessage(input, response) {
   var id = null;
   if ( !response.output ) {
     response.output = {};
-  } else {
+  } /*else {
     if ( logs ) {
       // If the logs db is set, then we want to record all input and responses
       id = uuid.v4();
       logs.insert( {'_id': id, 'request': input, 'response': response, 'time': new Date()});
     }
     return response;
-  }
+  }*/
   if ( response.intents && response.intents[0] ) {
     var intent = response.intents[0];
     // Depending on the confidence of the response the app can return different messages.
@@ -135,11 +134,21 @@ function updateMessage(input, response) {
     }
   }
   response.output.text = responseText;
-  if ( logs ) {
+  /*if ( logs ) {
     // If the logs db is set, then we want to record all input and responses
     id = uuid.v4();
     logs.insert( {'_id': id, 'request': input, 'response': response, 'time': new Date()});
+  }*/
+
+  if(response.intents && response.intents[0] && response.entities && response.entities && response.entities[0]) {
+    if(app.io_socket) {
+      var intent = response.intents[0].intent;
+      var entity = response.entities[0].value;
+      app.io_socket.emit('iot', { for: 'everyone', intent: intent, entity: entity });
+    }
+
   }
+
   return response;
 }
 
