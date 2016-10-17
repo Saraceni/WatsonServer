@@ -53,22 +53,20 @@
 </head>
 
 <body>
-    <ul id="messages"></ul>
-    <form action="">
-        <input id="m" autocomplete="off" /><button>Send</button>
-    </form>
+
+    <div style="width:800px; margin:0 auto;">
+        <br>
+        <h1>Dados Recebidos do Servidor:</h1>
+        <br>
+        <h1 id="messages"></h1>
+    </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
         var socket = io();
-        $('form').submit(function(){
-        socket.emit('iot', $('#m').val());
-        $('#m').val('');
-        return false;
-        });
         socket.on('iot', function(data){
-        $('#messages').append($('<li>').text(data.intent + " " + data.entity));
+        $('#messages').text(JSON.stringify(data));
       } );
     </script> 
 

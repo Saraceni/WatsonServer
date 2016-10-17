@@ -142,9 +142,13 @@ function updateMessage(input, response) {
 
   if(response.intents && response.intents[0] && response.entities && response.entities && response.entities[0]) {
     if(app.io_socket) {
-      var intent = response.intents[0].intent;
-      var entity = response.entities[0].value;
-      app.io_socket.emit('iot', { for: 'everyone', intent: intent, entity: entity });
+      //var intent = response.intents[0].intent;
+      var intents = response.intents;
+      //var entity = response.entities[0].value;
+      var entities = response.entities;
+      var data = { intents: intents, entities: entities }
+
+      app.io_socket.emit('iot', { data: data });
     }
 
   }
